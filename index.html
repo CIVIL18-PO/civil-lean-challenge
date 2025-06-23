@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Civil Lean Challenge - Lean Construction & BIM en Obras</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 800px;
+            width: 90%;
+            text-align: center;
+        }
+        
+        .logo {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #f093fb 0%, #f5576c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        
+        .start-screen, .game-screen, .results-screen {
+            display: none;
+        }
+        
+        .start-screen.active, .game-screen.active, .results-screen.active {
+            display: block;
+        }
+        
+        .player-input {
+            margin: 20px 0;
+        }
+        
+        .player-input input {
+            padding: 15px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 10px;
+            width: 300px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            backdrop-filter: blur(5px);
+        }
+        
+        .player-input input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .btn {
+            background: linear-gradient(45deg, #f093fb 0%, #f5576c 100%);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border-radius: 10px;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(240, 147, 251, 0.3);
+        }
+        
+        .question-container {
+            margin: 30px 0;
+        }
+        
+        .question {
+            font-size: 1.3em;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+        
+        .options {
+            display: grid;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .option {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1em;
+        }
+        
+        .option:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .option.selected {
+            background: linear-gradient(45deg, #f093fb 0%, #f5576c 100%);
+            border-color: #f5576c;
+        }
+        
+        .progress {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            height: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            background: linear-gradient(45deg, #f093fb 0%, #f5576c 100%);
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+        
+        .score-display {
+            font-size: 1.2em;
+            margin: 15px 0;
+        }
+        
+        .leaderboard {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .podium {
+            display: flex;
+            justify-content: center;
+            align-items: end;
+            margin: 30px 0;
+        }
+        
+        .podium-place {
+            margin: 0 10px;
+            text-align: center;
+        }
+        
+        .podium-1 {
+            order: 2;
+        }
+        
+        .podium-2 {
+            order: 1;
+        }
+        
+        .podium-3 {
+            order: 3;
+        }
+        
+        .podium-block {
+            width: 80px;
+            border-radius: 10px 10px 0 0;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        
+        .podium-1 .podium-block {
+            height: 100px;
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+        }
+        
+        .podium-2 .podium-block {
+            height: 80px;
+            background: linear-gradient(45deg, #c0c0c0, #e8e8e8);
+        }
+        
+        .podium-3 .podium-block {
+            height: 60px;
+            background: linear-gradient(45deg, #cd7f32, #daa520);
+        }
+        
+        .timer {
+            font-size: 1.5em;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+        
+        .timer.warning {
+            color: #ff6b6b;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .feedback {
+            margin: 15px 0;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+        
+        .feedback.correct {
+            background: rgba(46, 204, 113, 0.2);
+            border: 2px solid #2ecc71;
+        }
+        
+        .feedback.incorrect {
+            background: rgba(231, 76, 60, 0.2);
+            border: 2px solid #e74c3c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">CIVIL LEAN CHALLENGE</div>
+        <div class="subtitle">Lean Construction & BIM en Programación de Obras</div>
+        
+        <!-- Pantalla de inicio -->
+        <div class="start-screen active">
+            <h2>¡Bienvenido al Civil Lean Challenge!</h2>
+            <p>Desafía tus conocimientos sobre Lean Construction y BIM Management aplicados a la programación de obras en Ingeniería Civil</p>
+            <div class="player-input">
+                <input type="text" id="playerName" placeholder="Ingresa tu nombre" maxlength="20">
+            </div>
+            <button class="btn" onclick="startGame()">COMENZAR JUEGO</button>
+        </div>
+        
+        <!-- Pantalla de juego -->
+        <div class="game-screen">
+            <div class="progress">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div class="score-display">
+                <span id="currentQuestion">1</span> de <span id="totalQuestions">15</span> | 
+                Puntuación: <span id="score">0</span>
+            </div>
+            <div class="timer" id="timer">30</div>
+            
+            <div class="question-container">
+                <div class="question" id="question"></div>
+                <div class="options" id="options"></div>
+                <div class="feedback" id="feedback" style="display: none;"></div>
+            </div>
+            
+            <button class="btn" id="nextBtn" onclick="nextQuestion()" style="display: none;">SIGUIENTE</button>
+        </div>
+        
+        <!-- Pantalla de resultados -->
+        <div class="results-screen">
+            <h2>¡Juego Completado!</h2>
+            <div class="score-display">
+                <h3 id="finalScore"></h3>
+                <p id="performance"></p>
+            </div>
+            
+            <div class="leaderboard">
+                <h3>🏆 TABLA DE POSICIONES</h3>
+                <div class="podium" id="podium"></div>
+                <div id="leaderboardList"></div>
+            </div>
+            
+            <button class="btn" onclick="restartGame()">JUGAR DE NUEVO</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "¿Cuál es el principal objetivo de Lean Construction?",
+                options: [
+                    "Maximizar las ganancias del proyecto",
+                    "Eliminar desperdicios y maximizar el valor",
+                    "Acelerar los tiempos de construcción únicamente",
+                    "Reducir el número de trabajadores"
+                ],
+                correct: 1,
+                explanation: "Lean Construction busca eliminar desperdicios (mudas) y maximizar el valor para el cliente."
+            },
+            {
+                question: "¿Qué significa BIM en construcción?",
+                options: [
+                    "Building Information Modeling",
+                    "Basic Infrastructure Management",
+                    "Building Integration Method",
+                    "Business Intelligence Model"
+                ],
+                correct: 0,
+                explanation: "BIM significa Building Information Modeling, una metodología de trabajo colaborativo."
+            },
+            {
+                question: "¿Cuáles son los 7 desperdicios (mudas) identificados en Lean Construction?",
+                options: [
+                    "Solo sobreproducción, esperas y transporte",
+                    "Sobreproducción, esperas, transporte, sobreprocesamiento, inventario, movimiento y defectos",
+                    "Únicamente defectos y retrasos",
+                    "Solo problemas de calidad"
+                ],
+                correct: 1,
+                explanation: "Los 7 mudas son: sobreproducción, esperas, transporte, sobreprocesamiento, inventario, movimiento y defectos."
+            },
+            {
+                question: "¿Qué es el Last Planner System (LPS)?",
+                options: [
+                    "Un software de planificación",
+                    "Una herramienta de control de flujo de trabajo",
+                    "Un tipo de contrato",
+                    "Una certificación profesional"
+                ],
+                correct: 1,
+                explanation: "El LPS es una herramienta de control de flujo de trabajo que mejora la confiabilidad de la planificación."
+            },
+            {
+                question: "¿Cuál es una ventaja principal del uso de BIM en programación de obras?",
+                options: [
+                    "Elimina la necesidad de supervisión",
+                    "Permite la detección temprana de conflictos (clash detection)",
+                    "Reduce automáticamente los costos",
+                    "Elimina todos los riesgos del proyecto"
+                ],
+                correct: 1,
+                explanation: "BIM permite detectar conflictos entre elementos antes de la construcción, evitando retrabajos."
+            },
+            {
+                question: "¿Qué dimensión de BIM se relaciona con la programación temporal?",
+                options: [
+                    "3D - Geometría",
+                    "4D - Tiempo",
+                    "5D - Costos",
+                    "6D - Sostenibilidad"
+                ],
+                correct: 1,
+                explanation: "4D BIM integra la dimensión temporal, permitiendo visualizar la secuencia constructiva."
+            },
+            {
+                question: "En Lean Construction, ¿qué es el 'pull planning'?",
+                options: [
+                    "Planificación tradicional de arriba hacia abajo",
+                    "Planificación colaborativa desde la fecha de entrega hacia atrás",
+                    "Planificación solo por el contratista principal",
+                    "Planificación basada únicamente en recursos"
+                ],
+                correct: 1,
+                explanation: "Pull planning es planificación colaborativa que parte desde la fecha de entrega trabajando hacia atrás."
+            },
+            {
+                question: "¿Qué herramienta visual se usa comúnmente en Lean para mostrar el flujo de trabajo?",
+                options: [
+                    "Diagrama de Gantt tradicional",
+                    "Kanban Board",
+                    "Organigrama",
+                    "Planos arquitectónicos"
+                ],
+                correct: 1,
+                explanation: "Los Kanban Boards visualizan el flujo de trabajo y permiten identificar cuellos de botella."
+            },
+            {
+                question: "¿Cuál es el nivel de detalle más básico en BIM?",
+                options: [
+                    "LOD 100",
+                    "LOD 200",
+                    "LOD 300",
+                    "LOD 400"
+                ],
+                correct: 0,
+                explanation: "LOD 100 representa el nivel conceptual con información básica de volúmenes y ubicación."
+            },
+            {
+                question: "¿Qué significa 'Takt Time' en Lean Construction?",
+                options: [
+                    "Tiempo total del proyecto",
+                    "Tiempo de ritmo de producción según demanda",
+                    "Tiempo de descanso de trabajadores",
+                    "Tiempo de reuniones de coordinación"
+                ],
+                correct: 1,
+                explanation: "Takt Time es el ritmo de producción necesario para satisfacer la demanda del cliente."
+            },
+            {
+                question: "¿Cuál es una característica del BIM colaborativo?",
+                options: [
+                    "Cada disciplina trabaja de forma aislada",
+                    "Modelo central compartido con acceso simultáneo",
+                    "Solo el arquitecto puede modificar el modelo",
+                    "Se trabaja únicamente en 2D"
+                ],
+                correct: 1,
+                explanation: "BIM colaborativo permite que múltiples disciplinas trabajen simultáneamente en un modelo central."
+            },
+            {
+                question: "¿Qué es un 'constraint' en Last Planner System?",
+                options: [
+                    "Una meta del proyecto",
+                    "Una restricción que impide realizar una actividad",
+                    "Un tipo de contrato",
+                    "Una herramienta de software"
+                ],
+                correct: 1,
+                explanation: "Los constraints son restricciones que deben eliminarse antes de ejecutar una actividad."
+            },
+            {
+                question: "¿Cuál es el objetivo del 'Lookahead Planning'?",
+                options: [
+                    "Planificar solo la semana actual",
+                    "Identificar y remover restricciones en las próximas 3-6 semanas",
+                    "Hacer la planificación anual",
+                    "Controlar únicamente los costos"
+                ],
+                correct: 1,
+                explanation: "Lookahead Planning identifica y remueve restricciones en un horizonte de 3-6 semanas."
+            },
+            {
+                question: "¿Qué información adicional proporciona 5D BIM?",
+                options: [
+                    "Información temporal",
+                    "Información de costos",
+                    "Información de sostenibilidad",
+                    "Información de mantenimiento"
+                ],
+                correct: 1,
+                explanation: "5D BIM integra información de costos al modelo 3D y programación temporal."
+            },
+            {
+                question: "¿Cuál es un indicador clave (KPI) en Lean Construction?",
+                options: [
+                    "Solo el costo final del proyecto",
+                    "PPC (Percent Plan Complete) - Porcentaje de Plan Completado",
+                    "Número de trabajadores en obra",
+                    "Cantidad de reuniones realizadas"
+                ],
+                correct: 1,
+                explanation: "PPC mide la confiabilidad de la planificación, indicando qué porcentaje de actividades planificadas se completaron."
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let playerName = '';
+        let timeLeft = 30;
+        let timer;
+        let leaderboard = JSON.parse(localStorage.getItem('civilLeanChallengeLeaderboard')) || [];
+
+        function startGame() {
+            playerName = document.getElementById('playerName').value.trim();
+            if (!playerName) {
+                alert('Por favor ingresa tu nombre');
+                return;
+            }
+            
+            document.querySelector('.start-screen').classList.remove('active');
+            document.querySelector('.game-screen').classList.add('active');
+            
+            currentQuestionIndex = 0;
+            score = 0;
+            shuffleQuestions();
+            showQuestion();
+            startTimer();
+        }
+
+        function shuffleQuestions() {
+            for (let i = questions.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [questions[i], questions[j]] = [questions[j], questions[i]];
+            }
+        }
+
+        function showQuestion() {
+            const question = questions[currentQuestionIndex];
+            document.getElementById('question').textContent = question.question;
+            document.getElementById('currentQuestion').textContent = currentQuestionIndex + 1;
+            document.getElementById('totalQuestions').textContent = questions.length;
+            document.getElementById('score').textContent = score;
+            
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionElement = document.createElement('button');
+                optionElement.className = 'option';
+                optionElement.textContent = option;
+                optionElement.onclick = () => selectOption(index);
+                optionsContainer.appendChild(optionElement);
+            });
+            
+            updateProgressBar();
+            resetTimer();
+            document.getElementById('feedback').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'none';
+        }
+
+        function selectOption(selectedIndex) {
+            clearInterval(timer);
+            const question = questions[currentQuestionIndex];
+            const options = document.querySelectorAll('.option');
+            const feedback = document.getElementById('feedback');
+            
+            options.forEach(option => option.style.pointerEvents = 'none');
+            options[selectedIndex].classList.add('selected');
+            
+            if (selectedIndex === question.correct) {
+                score += Math.max(10, Math.floor(timeLeft / 3));
+                feedback.className = 'feedback correct';
+                feedback.textContent = '¡Correcto! ' + question.explanation;
+            } else {
+                feedback.className = 'feedback incorrect';
+                feedback.textContent = 'Incorrecto. ' + question.explanation;
+                options[question.correct].style.background = 'rgba(46, 204, 113, 0.3)';
+            }
+            
+            feedback.style.display = 'block';
+            document.getElementById('score').textContent = score;
+            document.getElementById('nextBtn').style.display = 'inline-block';
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                showQuestion();
+                startTimer();
+            } else {
+                endGame();
+            }
+        }
+
+        function startTimer() {
+            timeLeft = 30;
+            updateTimerDisplay();
+            timer = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    selectOption(-1); // Auto-select incorrect
+                }
+            }, 1000);
+        }
+
+        function resetTimer() {
+            clearInterval(timer);
+            timeLeft = 30;
+            updateTimerDisplay();
+        }
+
+        function updateTimerDisplay() {
+            const timerElement = document.getElementById('timer');
+            timerElement.textContent = timeLeft;
+            timerElement.className = timeLeft <= 10 ? 'timer warning' : 'timer';
+        }
+
+        function updateProgressBar() {
+            const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function endGame() {
+            clearInterval(timer);
+            
+            // Guardar puntuación
+            const playerData = {
+                name: playerName,
+                score: score,
+                date: new Date().toLocaleDateString()
+            };
+            
+            leaderboard.push(playerData);
+            leaderboard.sort((a, b) => b.score - a.score);
+            leaderboard = leaderboard.slice(0, 10); // Mantener solo top 10
+            localStorage.setItem('civilLeanChallengeLeaderboard', JSON.stringify(leaderboard));
+            
+            // Mostrar resultados
+            document.querySelector('.game-screen').classList.remove('active');
+            document.querySelector('.results-screen').classList.add('active');
+            
+            const percentage = (score / (questions.length * 30)) * 100;
+            document.getElementById('finalScore').textContent = `${playerName}: ${score} puntos`;
+            
+            let performance;
+            if (percentage >= 80) performance = "¡Excelente! Eres un experto en Lean Construction y BIM para Ing. Civil 🏆";
+            else if (percentage >= 60) performance = "¡Muy bien! Dominas bien los conceptos de programación de obras 👍";
+            else if (percentage >= 40) performance = "Bien, pero puedes mejorar en Lean Construction y BIM 📚";
+            else performance = "Necesitas repasar más los fundamentos de programación de obras 💪";
+            
+            document.getElementById('performance').textContent = performance;
+            
+            showLeaderboard();
+        }
+
+        function showLeaderboard() {
+            const podium = document.getElementById('podium');
+            const leaderboardList = document.getElementById('leaderboardList');
+            
+            podium.innerHTML = '';
+            leaderboardList.innerHTML = '';
+            
+            // Mostrar podio (top 3)
+            for (let i = 0; i < Math.min(3, leaderboard.length); i++) {
+                const place = document.createElement('div');
+                place.className = `podium-place podium-${i + 1}`;
+                
+                const block = document.createElement('div');
+                block.className = 'podium-block';
+                block.textContent = i + 1;
+                
+                const name = document.createElement('div');
+                name.textContent = leaderboard[i].name;
+                name.style.fontSize = '0.9em';
+                name.style.marginBottom = '5px';
+                
+                const scoreText = document.createElement('div');
+                scoreText.textContent = leaderboard[i].score + ' pts';
+                scoreText.style.fontSize = '0.8em';
+                
+                place.appendChild(name);
+                place.appendChild(block);
+                place.appendChild(scoreText);
+                podium.appendChild(place);
+            }
+            
+            // Mostrar lista completa
+            leaderboard.forEach((player, index) => {
+                const item = document.createElement('div');
+                item.style.cssText = 'display: flex; justify-content: space-between; padding: 10px; margin: 5px 0; background: rgba(255,255,255,0.1); border-radius: 5px;';
+                item.innerHTML = `
+                    <span>${index + 1}. ${player.name}</span>
+                    <span>${player.score} pts</span>
+                `;
+                leaderboardList.appendChild(item);
+            });
+        }
+
+        function restartGame() {
+            document.querySelector('.results-screen').classList.remove('active');
+            document.querySelector('.start-screen').classList.add('active');
+            document.getElementById('playerName').value = '';
+        }
+
+        // Inicializar el juego
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('playerName').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    startGame();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
